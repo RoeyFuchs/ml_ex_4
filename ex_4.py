@@ -1,7 +1,9 @@
 import torch
 from torchvision import transforms
 from torchvision import datasets
-from Net import Net
+from Model_A import Model_A
+from Model_B import Model_B
+
 
 import torch.optim as optim
 import torch.nn.functional as F
@@ -23,7 +25,7 @@ def test(model):
     correct = 0
     for data, target in test_loader:
         output = model(data)
-        test_loss += F.nll_loss(output, target, size_average=False).item()
+        test_loss += F.nll_loss(output, target, reduction='sum').item()
         pred = output.max(1, keepdim=True)[1]
         correct += pred.eq(target.view_as(pred)).cpu().sum()
 
@@ -34,18 +36,18 @@ def test(model):
 
 
 transform = transforms.Compose([transforms.ToTensor(),
-                                transforms.Normalize([-0.5], [0.5])])
+                                transforms.Normalize((0,), (1,))])
 batchSize = 64
 train_loader = torch.utils.data.DataLoader(
     datasets.FashionMNIST('./data', train=True, download=True, transform=transform),
     batch_size=batchSize, shuffle=True
 )
 test_loader = torch.utils.data.DataLoader(
-    datasets.FashionMNIST('./data', train=True, download=False, transform=transform),
+    datasets.FashionMNIST('./data', train=False, download=True, transform=transform),
     batch_size=batchSize, shuffle=True
 )
 
-model = Net(image_size=28 * 28)
+model = Model_B(image_size=28 * 28)
 lr = 0.001
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
